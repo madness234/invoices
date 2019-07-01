@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    {{ form(form) }}
+    <div id="invoiceTotal"></div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }} 
+    <script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.2.2/dist/latest/bootstrap-autocomplete.min.js"></script>
+    <script>
+        collectionAdd('.add-items', '#invoice_items');
+        collectionRemove();
+
+        $('.autocompleteSelect').autoComplete({
+            events: {
+                searchPost: function (resultFromServer) {
+                    var results = [];
+                    $(resultFromServer).each(function (index, item) {
+                        results.push({"value": item.id, "text": item.name + ' NIP: ' + item.nip});
+                    });
+
+                    return results;
+                }
+            }
+        });
+
+        {% if form.vars.value.buyer %}
+        $('.autocompleteSelect').autoComplete(
+                'set', {value: {{ form.vars.value.buyer.id }}, text: '{{ form.vars.value.buyer.name }} NIP: {{ form.vars.value.buyer.nip }}'}
+                );
+        {% endif %}
+
+            $('#invoice_issueDate').on('change', function (event) {
+
+                var issueDate = new Date($(this).val());
+                var month = issueDate.getMonth();
+                var year = issueDate.getFullYear();
+
+                var twoWeeksLater = new Date(issueDate.getTime() + 12096e5);
+                $('#invoice_paymentDate').val(twoWeeksLater.toISOString().substring(0, 10));
+
+                $.ajax({
+                    method: "GET",
+                    url: "/api/invoice-number.json/" + year + "/" + (month + 1)
+                })
+                        .done(function (result) {
+                            if (result.number) {
+                                $('#invoice_number').val(result.number);
+                            }
+                        });
+            });
+
+            $('#invoice').on('change', '.amount, .netPrice, .vat', function (event) {
+                calculateItem($(this).closest('.collection-item'));
+                calculateTotalGrossValue();
+            });
+
+            $('#invoice').on('click', '.add-collection-button, .remove-collection', function (event) {
+                calculateTotalGrossValue();
+            });
+            
+            calculateTotalGrossValue();
+
+            function calculateItem(item) {
+                var item = $(item);
+
+                var amount = $(item).find('.amount').val();
+                amount = amount.replace(',', '.');
+
+                var netPrice = $(item).find('.netPrice').val();
+                netPrice = netPrice.replace(',', '.');
+
+                var vat = $(item).find('.vat').val();
+
+                $(item).find('.netValue').val(amount * netPrice);
+
+                var grossValue = (amount * netPrice) + (amount * netPrice * (vat / 100));
+                $(item).find('.grossValue').val(grossValue);
+
+                return grossValue;
+            }
+
+            function calculateTotalGrossValue() {
+                var items = $('#invoice').find('.collection-item');
+
+                var total = 0;
+                $(items).each(function (index, item) {
+                    total = total + calculateItem(item);
+                });
+
+                $('#invoiceTotal').text(total);
+            }
+    </script>
+{% endblock %}

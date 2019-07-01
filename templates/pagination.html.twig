@@ -1,0 +1,23 @@
+<nav class="pagination">
+    <ul class="pagination justify-content-center">  
+        {% if page > 1 %} 
+            <li class="page-item"><a href="{{ path(routeName, searchString|merge({page: (page - 1)})) }}" class="prev page-link"><</a></li>
+            {% endif %}
+            {% if page > 2 %}                       
+            <li class="page-item"><a href="{{ path(routeName, searchString|merge({page: 1})) }}" class="page-link">1</a></li>
+        {% endif %}
+        {% if page > 1 %} 
+            <li class="page-item"><a href="{{ path(routeName, searchString|merge({page: (page - 1)})) }}" class="page-link">{{ (page - 1) }}</a></li>
+            {% endif %}
+         <li class="page-item"><a href="#" class="page-link">{{ page }}</a> </li>
+        {% if page < maxPage %} 
+            <li class="page-item"><a href="{{ path(routeName,  searchString|merge({page: (page + 1)})) }}" class="page-link">{{ (page + 1) }}</a></li>
+            {% endif %}
+            {% if page < (maxPage - 1) %}
+            <li class="page-item"><a href="{{ path(routeName, searchString|merge({page: maxPage})) }}" class="page-link">{{ maxPage }}</a></li>
+            {% endif %}    
+            {% if page < maxPage %} 
+            <li class="page-item"><a href="{{ path(routeName, searchString|merge({page: (page + 1)})) }}" class="next page-link">></a></li>
+            {% endif %}  
+    </ul>
+</nav>

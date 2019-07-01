@@ -1,0 +1,41 @@
+{% extends 'bootstrap_4_horizontal_layout.html.twig' %}
+
+{%- macro widget_prototype(widget) -%}
+{% if widget.vars.prototype is defined %}
+    {% set form = widget.vars.prototype %}
+    {% set name = widget.vars.prototype.vars.name %}    
+{% else %}
+    {% set form = widget %}
+    {% set name = widget.vars.full_name %}
+{% endif %}
+<div class="collection-item">
+    <button type="button" class="btn btn-sm btn-danger pull-right remove-collection">Usuń</button> 
+    {{- form_row(form) -}}
+    <hr />
+</div>
+{%- endmacro -%}        
+
+{%- block collection_widget -%}
+{% if prototype is defined %}
+    {%- set attr = attr|merge({'data-prototype': _self.widget_prototype(form)|e }) -%}
+{% endif %}
+<div {{ block('widget_container_attributes') }}>          
+    {%- if form.parent is empty -%}
+    {{ form_errors(form) }}
+    {%- endif -%}
+    {% for child in form %}
+        <div class="collection-item">
+            <button type="button" class="btn btn-sm btn-danger pull-right remove-collection">Usuń</button> 
+            {{- form_row(child) -}}
+            <hr />
+        </div>
+    {% endfor %}
+    {{- form_rest(form) -}}
+</div>
+{%- endblock collection_widget -%}  
+
+{%- block collection_label -%}
+    {{- form_label(form) -}} <button type="button" class="btn btn-sm btn-warning add-collection-button add-{{ form.vars.name }}"><i class="fa fa-plus"></i> Dodaj</button>
+{%- endblock collection_label -%}
+
+

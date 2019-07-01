@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <a href="{{ path('invoice_add') }}"><button class="btn btn-primary">Dodaj</button></a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Numer</th>
+                <th scope="col">Data wystawienia</th>
+                <th scope="col">Nabywca</th>
+                <th scope="col">Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in invoices %}
+                <tr>
+                    <td>{{ object.number }}</td>
+                    <td>{{ object.issueDate|date("d-m-Y") }}</td>
+                    <td>{{ object.buyer.name }} {{ object.buyer.nip }}</td>
+                    <td>
+                        <a href="{{ path('invoice_edit', {id: object.id}) }}"><button class="btn btn-primary">Edycja</button></a>
+                        <a href="{{ path('invoice_delete', {id: object.id}) }}"><button class="btn btn-danger">Usuń</button></a>
+                    </td>
+                </tr>
+            {% endfor %}       
+        </tbody>
+    </table>
+    {% include 'pagination.html.twig' with {page: page, maxPage: maxPage, routeName: 'invoice_list', searchString: {}} %}
+{% endblock %}
